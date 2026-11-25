@@ -1,0 +1,10 @@
+{
+  "functions": {"source": ".", "ignore": ["public/images/**","test/**",".git/**","README.md","node_modules/**","firebase-debug.log","firebase-debug.*.log"]},
+  "firestore": {"rules": "firestore.rules"},
+  "hosting": {
+    "public": "public",
+    "ignore": ["firebase.json","**/.*","**/node_modules/**"],
+    "rewrites": [{"source": "/api/**","function": {"functionId":"cardwarsApi","region":"asia-northeast3"}}],
+    "headers": [{"source":"**/*.webp","headers":[{"key":"Cache-Control","value":"public,max-age=86400"}]}]
+  }
+}
