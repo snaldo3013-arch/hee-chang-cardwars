@@ -40,7 +40,7 @@ async function handle(req,res){
  }
  if(req.method!=='GET')return send(res,405,{error:'허용되지 않은 요청'});
  const rel=u.pathname==='/'?'index.html':u.pathname.slice(1);
- if(!/^(index\.html|app\.js|style\.css|cards\.json|images\/(?:\d\d|hero-0[123])\.webp)$/.test(rel)){res.writeHead(404);return res.end();}
+ if(!/^(index\.html|app\.js|style\.css|cards\.json|firebase-config\.js|engine-browser\.js|free-transport\.js|images\/(?:\d\d|hero-0[123])\.webp)$/.test(rel)){res.writeHead(404);return res.end();}
  const f=path.join(__dirname,'public',rel);const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webp':'image/webp'}[path.extname(f)];
  fs.readFile(f,(e,data)=>{if(e){res.writeHead(404);return res.end();}res.writeHead(200,{'Content-Type':mime,'Cache-Control':rel.startsWith('images/')?'public, max-age=86400':'no-cache','X-Content-Type-Options':'nosniff'});res.end(data);});
 }

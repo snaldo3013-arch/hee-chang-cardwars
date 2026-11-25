@@ -1,4 +1,4 @@
-# 희창 카드워즈 v0.2 — 2인 멀티플레이
+# 희창 카드워즈 v0.3 — 무료 Spark 배포용
 
 ## 로컬에서 실행
 Node.js 18 이상이 설치된 PC에서 압축을 풀고 폴더를 열어 `npm start`를 실행합니다. 외부 라이브러리 설치는 필요 없습니다.
@@ -19,20 +19,18 @@ PC 브라우저에서는 http://localhost:3000 으로 접속합니다.
 
 ## 현재 제한
 로컬 모드는 단일 Node 서버에서 구동되며 서버 재시작 시 방이 소멸합니다.
-Firebase 배포 설정을 포함합니다. 실제 인터넷 공개는 별도의 신규 프로젝트에서 Firestore를 만들고 배포를 마친 뒤 가능합니다.
+Firebase Spark 무료 배포 설정을 포함합니다. 실제 인터넷 공개는 별도의 신규 Firebase 프로젝트 연결 및 배포를 마친 뒤 가능합니다.
 3~4인전, 직접 덱 편집, 랭킹은 후속 단계입니다.
 직원 이미지가 들어 있으므로 공개 배포 전 해당 직원의 동의를 확인합니다.
 
-## Firebase 배포
+## Firebase Spark 무료 배포
 
 카드워즈 전용 신규 Firebase 프로젝트만 사용합니다. 기존 퀴즈왕, 여행앱, 팬카페 프로젝트에는 배포하지 않습니다.
 
-1. Firebase 콘솔에서 새 프로젝트를 생성하고 Cloud Firestore를 활성화합니다.
-2. Cloud Functions를 배포하려면 Blaze 요금제 연결이 필요합니다. 결제 설정은 사용자가 승인해야 합니다.
-3. Node 22 및 Firebase CLI 환경에서 프로젝트 ID를 명시해 배포합니다.
-4. `npm install`, `npm test` 후 `firebase deploy --project YOUR_PROJECT_ID --only firestore:rules,functions,hosting`을 실행합니다.
-5. Hosting에서 제공하는 URL을 실제 스마트폰 두 대로 열어 방 생성, 초대, 대전 및 재접속을 검증합니다.
+1. Firebase 콘솔에서 새 프로젝트를 생성하고 Spark 요금제를 유지합니다.
+2. Authentication에서 익명 로그인을 활성화하고 Realtime Database를 잠금 모드로 생성합니다.
+3. 웹 앱을 등록한 다음 웹 앱 설정 객체를 `public/firebase-config.js`에 반영합니다.
+4. Firebase CLI로 전용 프로젝트 ID를 지정해 `firebase deploy --project YOUR_PROJECT_ID --only database,hosting`을 실행합니다.
+5. Hosting URL을 실제 스마트폰 두 대로 테스트합니다. GitHub Pages로 배포할 경우 public 폴더 전체를 정적 사이트로 게시합니다.
 
-비공개 게임 상태는 서버의 Firestore 트랜잭션을 통해서만 변경됩니다. 게스트 접근 토큰은 해시로 저장하고, 상대 손패는 서버에서 제외합니다. 방의 활동 기한은 6시간입니다. 필요하다면 Firestore TTL 정책에서 `cardwarsRooms.expiresAt`에 만료 정책을 적용합니다.
-
-무료 요금제에서 게임 서버를 배포할 수 있다고 보장하지 않습니다. Cloud Functions 및 Firestore 사용량에 따라 비용이 발생할 수 있습니다. 서버의 최대 인스턴스는 2개로 제한했으며, 게임 화면이 숨겨졌을 때는 상태 요청을 멈춥니다.
+AI 대전은 브라우저에서 실행되므로 Firebase 연결 없이도 정적 호스팅에서 작동합니다. 친구 대전은 방장 브라우저에서 게임 진행을 계산하고, 참가자는 자신의 패와 행동 요청만 데이터베이스에서 볼 수 있습니다. 방장은 경기 계산을 담당하므로 방장 브라우저를 계속 열어둬야 하며, 신뢰할 수 있는 친구끼리 플레이하는 용도입니다. 방은 생성 후 6시간 만료됩니다. 배포 설정에 Cloud Functions나 유료 서버를 포함하지 않습니다. Spark 무료 사용량 제한을 넘으면 서비스가 제한될 수 있습니다.

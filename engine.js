@@ -1,5 +1,5 @@
 'use strict';
-const catalog = require('./public/cards.json');
+function createEngine(catalog){
 const cards = Object.fromEntries(catalog.cards.map(c => [c.id,c]));
 const heroes = Object.fromEntries(catalog.heroes.map(c => [c.id,c]));
 const id = n => 'card-'+String(n).padStart(2,'0');
@@ -105,4 +105,7 @@ function bot(g,i){
   }if(g.turn===i&&g.winner===null)apply(g,i,{type:'end'});
 }
 function view(g,i){return {turn:g.turn,round:g.round,winner:g.winner,rev:g.rev,log:g.log.slice(-8),players:g.players.map((p,j)=>({name:p.name,hero:p.hero,hp:p.hp,mana:p.mana,maxMana:p.maxMana,deckCount:p.deck.length,handCount:p.hand.length,hand:i===j?p.hand:undefined,board:p.board,traps:i===j?p.traps:p.traps.length,revealed:i===j?p.revealed:undefined,usedSkill:p.usedSkill,discount:i===j?p.discount:undefined})),actions:actions(g,i)};}
-module.exports={catalog,cards,heroes,createGame,apply,actions,bot,view,deckFor};
+return {catalog,cards,heroes,createGame,apply,actions,bot,view,deckFor};
+}
+if(typeof module!=='undefined'&&module.exports)module.exports=createEngine(require('./public/cards.json'));
+else globalThis.createCardwarsEngine=createEngine;

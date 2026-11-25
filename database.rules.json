@@ -1,0 +1,48 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "cardwarsRooms": {
+      "$code": {
+        "meta": {
+          ".read": "auth != null && $code.matches(/^[0-9]{6}$/)",
+          ".write": "auth != null && $code.matches(/^[0-9]{6}$/) && ((!data.exists() && newData.child('host/uid').val() === auth.uid && !newData.child('guest').exists() && newData.child('expiresAt').val() > now && newData.child('expiresAt').val() <= now + 21600000 + 60000) || (data.exists() && data.child('expiresAt').val() > now && !data.child('guest').exists() && newData.child('guest/uid').val() === auth.uid && data.child('host/uid').val() !== auth.uid && newData.child('host/uid').val() === data.child('host/uid').val() && newData.child('host/name').val() === data.child('host/name').val() && newData.child('host/hero').val() === data.child('host/hero').val() && newData.child('expiresAt').val() === data.child('expiresAt').val()))",
+          ".validate": "newData.hasChildren(['host','expiresAt'])",
+          "host": {
+            ".validate": "newData.hasChildren(['uid','name','hero'])",
+            "uid": {".validate": "newData.isString()"},
+            "name": {".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 16"},
+            "hero": {".validate": "newData.isString() && newData.val().matches(/^hero-0[123]$/)"},
+            "$other": {".validate": false}
+          },
+          "guest": {
+            ".validate": "newData.hasChildren(['uid','name','hero'])",
+            "uid": {".validate": "newData.isString()"},
+            "name": {".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 16"},
+            "hero": {".validate": "newData.isString() && newData.val().matches(/^hero-0[123]$/)"},
+            "$other": {".validate": false}
+          },
+          "expiresAt": {".validate": "newData.isNumber()"},
+          "$other": {".validate": false}
+        },
+        "game": {
+          ".read": "auth != null && root.child('cardwarsRooms/'+$code+'/meta/host/uid').val() === auth.uid",
+          ".write": "auth != null && root.child('cardwarsRooms/'+$code+'/meta/host/uid').val() === auth.uid && root.child('cardwarsRooms/'+$code+'/meta/expiresAt').val() > now",
+          ".validate": "newData.isString() && newData.val().length <= 64000"
+        },
+        "views": {
+          "$uid": {
+            ".read": "auth != null && (auth.uid === $uid || root.child('cardwarsRooms/'+$code+'/meta/host/uid').val() === auth.uid) && (root.child('cardwarsRooms/'+$code+'/meta/host/uid').val() === $uid || root.child('cardwarsRooms/'+$code+'/meta/guest/uid').val() === $uid)",
+            ".write": "auth != null && root.child('cardwarsRooms/'+$code+'/meta/host/uid').val() === auth.uid && root.child('cardwarsRooms/'+$code+'/meta/expiresAt').val() > now && (root.child('cardwarsRooms/'+$code+'/meta/host/uid').val() === $uid || root.child('cardwarsRooms/'+$code+'/meta/guest/uid').val() === $uid)",
+            ".validate": "newData.isString() && newData.val().length <= 64000"
+          }
+        },
+        "request": {
+          ".read": "auth != null && (root.child('cardwarsRooms/'+$code+'/meta/host/uid').val() === auth.uid || root.child('cardwarsRooms/'+$code+'/meta/guest/uid').val() === auth.uid)",
+          ".write": "auth != null && root.child('cardwarsRooms/'+$code+'/meta/expiresAt').val() > now && ((root.child('cardwarsRooms/'+$code+'/meta/host/uid').val() === auth.uid && !newData.exists()) || (root.child('cardwarsRooms/'+$code+'/meta/guest/uid').val() === auth.uid && !data.exists() && newData.exists()))",
+          ".validate": "newData.isString() && newData.val().length <= 2048"
+        }
+      }
+    }
+  }
+}
