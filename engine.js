@@ -55,7 +55,7 @@ function apply(g,i,a) {
   if(!actions(g,i).some(x=>same(x,a)))throw Error('지금 사용할 수 없는 행동입니다.');
   const p=g.players[i],e=g.players[1-i];
   if(a.type==='end'){g.turn=1-i;if(g.turn===0)g.round++;begin(g,g.turn);}
-  if(a.type==='skill'){p.mana-=2;p.usedSkill=true;log(g,p.name+': '+heroes[p.hero].skill);if(p.hero==='hero-01')p.board.forEach(u=>u.attack++);if(p.hero==='hero-02')e.board.forEach(u=>u.hp-=2);if(p.hero==='hero-03')find(e,a.target).frozen=1;}
+  if(a.type==='skill'){p.mana-=2;p.usedSkill=true;g.skillEvents=[...(g.skillEvents||[]),{rev:g.rev+1,actor:i,hero:p.hero,target:a.target??null}].slice(-16);log(g,p.name+': '+heroes[p.hero].skill);if(p.hero==='hero-01')p.board.forEach(u=>u.attack++);if(p.hero==='hero-02')e.board.forEach(u=>u.hp-=2);if(p.hero==='hero-03')find(e,a.target).frozen=1;}
   if(a.type==='attack'){const u=find(p,a.source);u.moves--;if(trap(g,1-i,6)){log(g,'공격이 무효화되었습니다.');}else{
     if(trap(g,1-i,9))weaken(u,2);if(trap(g,1-i,12))weaken(u,1);if(trap(g,1-i,37)){u.frozen=1;u.moves=0;}
     let damage=u.attack;if(is(u.card,19))damage++;
@@ -109,7 +109,7 @@ function bot(g,i){
     aa.sort((a,b)=>score(b)-score(a));apply(g,i,aa[0]);
   }if(g.turn===i&&g.winner===null)apply(g,i,{type:'end'});
 }
-function view(g,i){return {turn:g.turn,round:g.round,winner:g.winner,rev:g.rev,criticalHits:(g.criticalHits||[]).slice(),log:g.log.slice(-8),players:g.players.map((p,j)=>({name:p.name,hero:p.hero,hp:p.hp,mana:p.mana,maxMana:p.maxMana,deckCount:p.deck.length,handCount:p.hand.length,hand:i===j?p.hand:undefined,board:p.board,traps:i===j?p.traps:p.traps.length,revealed:i===j?p.revealed:undefined,usedSkill:p.usedSkill,discount:i===j?p.discount:undefined})),actions:actions(g,i)};}
+function view(g,i){return {turn:g.turn,round:g.round,winner:g.winner,rev:g.rev,skillEvents:(g.skillEvents||[]).slice(),criticalHits:(g.criticalHits||[]).slice(),log:g.log.slice(-8),players:g.players.map((p,j)=>({name:p.name,hero:p.hero,hp:p.hp,mana:p.mana,maxMana:p.maxMana,deckCount:p.deck.length,handCount:p.hand.length,hand:i===j?p.hand:undefined,board:p.board,traps:i===j?p.traps:p.traps.length,revealed:i===j?p.revealed:undefined,usedSkill:p.usedSkill,discount:i===j?p.discount:undefined})),actions:actions(g,i)};}
 return {catalog,cards,heroes,createGame,apply,actions,bot,view,deckFor};
 }
 if(typeof module!=='undefined'&&module.exports)module.exports=createEngine(require('./public/cards.json'));

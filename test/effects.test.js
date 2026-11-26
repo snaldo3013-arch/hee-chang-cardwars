@@ -28,3 +28,10 @@ test('critical hit is based on current HP, shared for both participants, and doe
 test('critical hit retains attacker and defeated target art after both leave board',()=>{
  const E=require('../engine'),g=E.createGame([{name:'A',hero:'hero-01'},{name:'B',hero:'hero-02'}]);g.players[0].board=[{uid:'u1',card:'card-01',attack:3,hp:2,moves:1}];g.players[1].board=[{uid:'u2',card:'card-02',attack:2,hp:3,moves:1}];E.apply(g,0,{type:'attack',source:'u1',target:'u2'});assert.equal(g.players[0].board.length,0);assert.equal(g.players[1].board.length,0);assert.equal(g.criticalHits[0].targetCard,'card-02');assert.equal(g.criticalHits[0].card,'card-01');
 });
+test('three hero skill themes are triggered only by new confirmed game actions',()=>{
+ const E=require('../engine'),{skillStyles}=require('../public/battle-effects.js');
+ for(const hero of E.catalog.heroes){const g=E.createGame([{name:'A',hero:hero.id},{name:'B',hero:'hero-01'}]);g.players[0].mana=2;g.players[1].board=[{uid:'u1',card:'card-01',attack:1,hp:5,moves:1,frozen:0}];const before=JSON.parse(JSON.stringify(E.view(g,0)));const skill=E.actions(g,0).find(a=>a.type==='skill');E.apply(g,0,skill);const after=E.view(g,0);assert.equal(after.skillEvents[0].hero,hero.id);assert.deepEqual(E.view(g,1).skillEvents,after.skillEvents);assert.equal(changes(before,after,undefined,1).skills.length,1);assert.equal(changes(after,after,undefined,0).skills,undefined);assert.ok(skillStyles[hero.id]);}
+});
+test('sound cues use short audible notes and preview respects legal hand actions',()=>{
+ const {notes,previewModel}=require('../public/battle-effects.js');for(const key of ['summon','strike','hit','heal','cast','critical','turn','queen','engineer','taunt'])assert.ok(notes[key].every(([hz,d])=>hz>=20&&hz<=20000&&d>0&&d<=.3));const card=require('../public/cards.json').cards[0];assert.equal(previewModel(card,[{type:'play',h:0}],0).canUse,true);assert.equal(previewModel(card,[{type:'play',h:1}],0).canUse,false);assert.match(previewModel(card,[],0).stats,/⚔ 2/);
+});
