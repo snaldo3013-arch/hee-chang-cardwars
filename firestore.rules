@@ -1,7 +1,0 @@
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // The trusted server SDK handles every game action. No client can read or edit private rooms directly.
-    match /{document=**} { allow read, write: if false; }
-  }
-}
