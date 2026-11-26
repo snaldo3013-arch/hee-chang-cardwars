@@ -16,8 +16,9 @@
   const spell=newLogs.slice().reverse().find(line=>line.includes(': ')),summon=events.some(e=>e.kind==='summon');
   if(action?.type==='skill'||(!summon&&(action?.type==='play'||spell))){cast=true;banner=spell?.split(': ').slice(1).join(': ')||'기술 발동!';}
   if(summon&&!banner)banner='카드 소환!';
-  if(old.turn!==g.turn&&!banner)banner=g.turn===me?'⚡ 내 턴':'상대 턴';
-  return {events,cast,banner,turn:old.turn!==g.turn};
+  const turn=old.turn!==g.turn||old.round!==g.round;
+  if(turn&&!banner)banner=g.turn===me?'⚡ 내 턴':'상대 턴';
+  return {events,cast,banner,turn};
  }
  function play(arena,fx){if(!arena||!fx)return;const cleanup=(el,cls)=>{el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),1050)};
   for(const e of fx.events){const side=e.side?'true':'false';const unit=e.uid&&Array.from(arena.querySelectorAll('[data-unit]')).find(n=>n.dataset.unit===String(e.uid));const target=unit||arena.querySelector(e.uid?`[data-board="${side}"]`:`[data-profile="${side}"]`);if(!target)continue;cleanup(target,'fx-'+e.kind);if(e.delta){const rect=target.getBoundingClientRect(),ar=arena.getBoundingClientRect(),n=document.createElement('span');n.className='fx-number'+(e.delta>0?' heal':'');n.textContent=(e.delta>0?'+':'')+e.delta;n.style.left=rect.left-ar.left+rect.width/2+'px';n.style.top=rect.top-ar.top+rect.height/2+'px';arena.append(n);setTimeout(()=>n.remove(),1000);}}
