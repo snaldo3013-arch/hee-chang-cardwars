@@ -59,6 +59,11 @@ function apply(g,i,a) {
   if(a.type==='attack'){const u=find(p,a.source);u.moves--;if(trap(g,1-i,6)){log(g,'공격이 무효화되었습니다.');}else{
     if(trap(g,1-i,9))weaken(u,2);if(trap(g,1-i,12))weaken(u,1);if(trap(g,1-i,37)){u.frozen=1;u.moves=0;}
     let damage=u.attack;if(is(u.card,19))damage++;
+    const victim=a.target==='hero'?e:find(e,a.target);
+    if(damage>0&&damage*2>=victim.hp){
+      const entry={rev:g.rev+1,actor:i,source:u.uid,card:u.card,target:a.target,targetCard:a.target==='hero'?e.hero:victim.card,damage,hpBefore:victim.hp};
+      g.criticalHits=[...(g.criticalHits||[]),entry].slice(-16);
+    }
     if(a.target==='hero'){e.hp-=damage;log(g,p.name+'의 공격 · 영웅 피해 '+damage);}else{const v=find(e,a.target);v.hp-=damage;u.hp-=v.attack;log(g,cards[u.card].name+' 공격 → '+cards[v.card].name);}
   }}
   if(a.type==='play'){
@@ -104,7 +109,7 @@ function bot(g,i){
     aa.sort((a,b)=>score(b)-score(a));apply(g,i,aa[0]);
   }if(g.turn===i&&g.winner===null)apply(g,i,{type:'end'});
 }
-function view(g,i){return {turn:g.turn,round:g.round,winner:g.winner,rev:g.rev,log:g.log.slice(-8),players:g.players.map((p,j)=>({name:p.name,hero:p.hero,hp:p.hp,mana:p.mana,maxMana:p.maxMana,deckCount:p.deck.length,handCount:p.hand.length,hand:i===j?p.hand:undefined,board:p.board,traps:i===j?p.traps:p.traps.length,revealed:i===j?p.revealed:undefined,usedSkill:p.usedSkill,discount:i===j?p.discount:undefined})),actions:actions(g,i)};}
+function view(g,i){return {turn:g.turn,round:g.round,winner:g.winner,rev:g.rev,criticalHits:(g.criticalHits||[]).slice(),log:g.log.slice(-8),players:g.players.map((p,j)=>({name:p.name,hero:p.hero,hp:p.hp,mana:p.mana,maxMana:p.maxMana,deckCount:p.deck.length,handCount:p.hand.length,hand:i===j?p.hand:undefined,board:p.board,traps:i===j?p.traps:p.traps.length,revealed:i===j?p.revealed:undefined,usedSkill:p.usedSkill,discount:i===j?p.discount:undefined})),actions:actions(g,i)};}
 return {catalog,cards,heroes,createGame,apply,actions,bot,view,deckFor};
 }
 if(typeof module!=='undefined'&&module.exports)module.exports=createEngine(require('./public/cards.json'));
